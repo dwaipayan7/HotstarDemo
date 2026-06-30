@@ -2,7 +2,7 @@ import { COLORS } from "@/constants/colors";
 import { RootStackParamList } from "@/navigation/MainTabNavigator";
 import SCText from "@/utils/CustomText";
 import { globalStyles } from "@/utils/globalStyles";
-import { Feather } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as ExpoSplashScreen from "expo-splash-screen";
@@ -45,7 +45,9 @@ export default function SplashScreen() {
                     fontSize: 28,
                     fontWeight: 'bold'
                 }}>Hotstar</SCText>
-                <Feather name="star" size={25} color={'gold'} />
+                {/* <Feather name="star" size={25} color={'gold'} /> */}
+                <FontAwesome name="star" size={24} color={COLORS.golden} />
+
             </View>
             <SCText color={COLORS.white} >Streaming the future...</SCText>
         </View>

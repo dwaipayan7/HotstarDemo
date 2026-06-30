@@ -24,6 +24,7 @@ export const videoSource = 'https://www.w3schools.com/html/mov_bbb.mp4';
 
 const HomeDetailsScreen = () => {
 
+
     const ContentDetailsSkeleton = () => {
         return (
             <View>
@@ -102,6 +103,9 @@ const HomeDetailsScreen = () => {
     console.log("THe Id is: ", id);
 
     const { data: content, isFetching: isFetchingContent } = useContentDetails(id);
+
+
+
 
     console.log("The COntents are: ", content);
 
@@ -241,7 +245,7 @@ const HomeDetailsScreen = () => {
                     )} */}
 
                     {!showSkeleton && (
-                        <ContentCardDetails item={content} />
+                        <ContentCardDetails loading={showSkeleton} item={content} />
                     )}
 
                     <View style={{ paddingBottom: 100 }}>

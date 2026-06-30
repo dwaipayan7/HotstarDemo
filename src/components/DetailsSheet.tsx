@@ -6,22 +6,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Video from 'react-native-video';
 import ContentCardDetails from './ContentCardDetails';
+import ContentCardDetailsSkeleton from './ContentCardDetailsSkeleton';
 
 
 interface Props {
     show: boolean;
     close: () => void;
-    id: string;
+    id?: string;
 }
 
 const DetailsSheet = ({ show, close, id }: Props) => {
@@ -49,7 +49,7 @@ const DetailsSheet = ({ show, close, id }: Props) => {
         return () => clearTimeout(timer);
     }, [id]);
 
-    const { data: content, isFetching } = useContentDetails(id);
+    const { data: content, isFetching } = useContentDetails(id ?? '');
 
 
 
@@ -93,11 +93,11 @@ const DetailsSheet = ({ show, close, id }: Props) => {
             >
                 <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
                     <View style={styles.videoContainer}>
-                        {(!showVideo || loading) && (
+                        {/* {(!showVideo || loading) && (
                             <View style={styles.videoLoader}>
                                 <ActivityIndicator size="large" color={COLORS.white} />
                             </View>
-                        )}
+                        )} */}
 
                         {showVideo && (
                             <Video
@@ -152,17 +152,16 @@ const DetailsSheet = ({ show, close, id }: Props) => {
                         </View> */}
                     </View>
 
-                    {content?.data && (
 
-
+                    {content?.data ? (
                         <ContentCardDetails item={content} />
-                    )}
+                    ) : <ContentCardDetailsSkeleton />}
 
-                    {isFetching && (
+                    {/* {isFetching && (
                         <View style={styles.fullLoader}>
                             <ActivityIndicator size="large" color={COLORS.white} />
                         </View>
-                    )}
+                    )} */}
                 </ScrollView>
             </SafeAreaView>
             {/* </ActionSheet > */}

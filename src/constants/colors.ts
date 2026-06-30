@@ -37,4 +37,6 @@ export const COLORS = {
   green: "#46d369",
   gray: "#aaa",
   gradient1: "#05010D",
+  golden: "#FFD700",
+  premium: "#FFD70022",
 };

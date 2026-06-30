@@ -10,7 +10,7 @@ import { HeroBanner } from '@/services/mockData';
 import { deviceHeight, deviceWidth } from '@/utils/AllContext';
 import SCText from '@/utils/CustomText';
 import { globalStyles } from '@/utils/globalStyles';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Skeleton } from '@rneui/base';
 import { Image } from 'expo-image';
@@ -111,7 +111,7 @@ const HomeScreen = () => {
                 />
                 <LinearGradient
                     colors={COLORS.gradient2}
-                    locations={[0, 0.6, 0.8, 1]}
+                    locations={[0, 0.6, 1]}
                     style={{
                         position: 'absolute',
                         left: 0,
@@ -255,7 +255,7 @@ const HomeScreen = () => {
                         <View style={styles.header}>
                             <View style={{ flex: 1 }}>
                                 <View style={{ ...globalStyles.row, gap: 4 }}>
-                                    <Feather name="star" size={24} color="gold" />
+                                    <FontAwesome name="star" size={24} color="gold" />
                                     <SCText style={{
                                         fontWeight: 'bold'
                                     }} size={20} color={COLORS.white}>HOTSTAR</SCText>

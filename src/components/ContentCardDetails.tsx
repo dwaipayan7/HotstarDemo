@@ -1,81 +1,101 @@
 import { COLORS } from '@/constants/colors'
+import { selectInWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice'
+import { useAppDispatch, useAppSelector } from '@/redux/store/store'
 
 import SCText from '@/utils/CustomText'
 import { Ionicons } from '@expo/vector-icons'
 import { memo } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import ContentCardDetailsSkeleton from './ContentCardDetailsSkeleton'
 
-const ContentCardDetails = memo(({ item }: { item: any }) => {
+const ContentCardDetails = memo(({ item, loading }: { item: any, loading?: boolean }) => {
+
+    const dispatch = useAppDispatch();
+    const isSaved = useAppSelector(selectInWatchlist(item.id));
+
+    const handleToggle = () => {
+        dispatch(toggleWatchList(item?.data?.id));
+    };
+
     return (
         <View style={styles.itemContainer}>
 
-            <View>
-                <SCText style={{
-                    fontSize: 18,
-                    marginBottom: 6,
-                    fontWeight: 'bold'
-                }} color={COLORS.white}>{item?.data?.title}</SCText>
-            </View>
-            <View style={styles.metaInfo}>
-                <SCText size={13} color={COLORS.green} style={styles.matchText}>
-                    {98}% Match
-                </SCText>
-                <SCText size={13} color={COLORS.gray}>
-                    {item?.data?.releaseYear}
-                </SCText>
-                <View style={styles.dot} />
-                <SCText size={13} color={COLORS.gray}>
-                    {item?.data?.duration ?? `${item?.data?.totalSeasons} Seasons`}
-                </SCText>
-                <View style={styles.ratingPill}>
-                    <SCText size={11} color={COLORS.white}>
-                        {item?.data?.rating}
+
+            {loading ? (
+                <ContentCardDetailsSkeleton />
+            ) : (
+                <>
+                    <View>
+                        <SCText style={{
+                            fontSize: 18,
+                            marginBottom: 6,
+                            fontWeight: 'bold'
+                        }} color={COLORS.white}>{item?.data?.title}</SCText>
+                    </View>
+                    <View style={styles.metaInfo}>
+                        <SCText size={13} color={COLORS.green} style={styles.matchText}>
+                            {98}% Match
+                        </SCText>
+                        <SCText size={13} color={COLORS.gray}>
+                            {item?.data?.releaseYear}
+                        </SCText>
+                        <View style={styles.dot} />
+                        <SCText size={13} color={COLORS.gray}>
+                            {item?.data?.duration ?? `${item?.data?.totalSeasons} Seasons`}
+                        </SCText>
+                        <View style={styles.ratingPill}>
+                            <SCText size={11} color={COLORS.white}>
+                                {item?.data?.rating}
+                            </SCText>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity style={styles.playButton}>
+                        <Ionicons name="play" size={20} color={COLORS.textBlack} />
+                        <SCText size={16} color={COLORS.textBlack} style={styles.playText}>
+                            Play
+                        </SCText>
+                    </TouchableOpacity>
+
+                    <View style={styles.actionRow}>
+                        <TouchableOpacity style={styles.actionItem} onPress={handleToggle}>
+                            <Ionicons name={isSaved ? "checkmark-circle" : "add-circle-outline"} size={22} color={COLORS.white} />
+                            <SCText size={11} color={COLORS.gray100}>{isSaved ? "Watchlisted" : "Watchlist"}</SCText>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionItem}>
+                            <Ionicons name="download-outline" size={20} color={COLORS.white} />
+                            <SCText size={11} color={COLORS.gray100}>Download</SCText>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionItem}>
+                            <Ionicons name="share-social-outline" size={20} color={COLORS.white} />
+                            <SCText size={11} color={COLORS.gray100}>Share</SCText>
+                        </TouchableOpacity>
+                    </View>
+
+                    <SCText size={15} color={COLORS.gray100} style={styles.description}>
+                        {item?.data?.description}
                     </SCText>
-                </View>
-            </View>
 
-            <TouchableOpacity style={styles.playButton}>
-                <Ionicons name="play" size={20} color={COLORS.textBlack} />
-                <SCText size={16} color={COLORS.textBlack} style={styles.playText}>
-                    Play
-                </SCText>
-            </TouchableOpacity>
-
-            <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.actionItem}>
-                    <Ionicons name="add" size={22} color={COLORS.white} />
-                    <SCText size={11} color={COLORS.gray100}>Watchlist</SCText>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionItem}>
-                    <Ionicons name="download-outline" size={20} color={COLORS.white} />
-                    <SCText size={11} color={COLORS.gray100}>Download</SCText>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionItem}>
-                    <Ionicons name="share-social-outline" size={20} color={COLORS.white} />
-                    <SCText size={11} color={COLORS.gray100}>Share</SCText>
-                </TouchableOpacity>
-            </View>
-
-            <SCText size={15} color={COLORS.gray100} style={styles.description}>
-                {item?.data?.description}
-            </SCText>
-
-            {/* {!! item.data.cast?.length && (
+                    {/* {!! item.data.cast?.length && (
                                 <SCText size={13} color={COLORS.gray} style={styles.castLine} numberOfLines={2}>
                                     Cast: { item.data.cast.join(', ')}
                                 </SCText>
                             )} */}
 
-            <View style={styles.tagsContainer}>
-                {item?.data?.genres?.map((genre: any) => (
-                    <View key={genre.id} style={styles.tag}>
-                        <SCText size={12} color={COLORS.white}>{genre.name}</SCText>
+                    <View style={styles.tagsContainer}>
+                        {item?.data?.genres?.map((genre: any) => (
+                            <View key={genre.id} style={styles.tag}>
+                                <SCText size={12} color={COLORS.white}>{genre.name}</SCText>
+                            </View>
+                        ))}
                     </View>
-                ))}
-            </View>
+                </>
+            )}
+
         </View>
     );
 });
+
 
 export default ContentCardDetails
 
