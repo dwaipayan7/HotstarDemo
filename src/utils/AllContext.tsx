@@ -20,8 +20,8 @@ import { TSnackbarVariant } from "@/services/mockData";
 // Avoid calling React hooks at module scope. Use the Redux store token when
 // making non-component requests.
 
-export const deviceHeight = Dimensions.get("screen").height;
-export const deviceWidth = Dimensions.get("screen").width;
+export const deviceHeight = Dimensions.get("window").height;
+export const deviceWidth = Dimensions.get("window").width;
 export const isMobile: boolean = deviceWidth <= 480 ? true : false;
 export const isSmallDeviceWidth: boolean = deviceWidth <= 375 ? true : false;
 

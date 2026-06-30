@@ -1,149 +1,410 @@
 import GradientWrapper from '@/components/GradientWrapper';
+import RenderContent from '@/components/RenderContent';
+import { RowSkeleton } from '@/components/RowSkeleton';
+import { COLORS } from '@/constants/colors';
 import { RootStackParamList } from '@/navigation/MainTabNavigator';
+import { selectWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/store/store';
 import { useHomeData } from '@/services/homeService';
-import { ContentItem, ContentRow, HeroBanner } from '@/services/mockData';
+import { HeroBanner } from '@/services/mockData';
+import { deviceHeight, deviceWidth } from '@/utils/AllContext';
 import SCText from '@/utils/CustomText';
+import { globalStyles } from '@/utils/globalStyles';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Skeleton } from '@rneui/base';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
-    Dimensions,
     FlatList,
-    Image,
+    RefreshControl,
     ScrollView,
     StatusBar,
     StyleSheet,
     TouchableOpacity,
     View
 } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
+
+
+
 
 const HomeScreen = () => {
-    const { data } = useHomeData();
+    const { data, isLoading, isFetching, refetch } = useHomeData();
+
+    console.log("The Data are: ", data);
+
+
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const handlePress = (id: string) => {
         navigation.navigate('HomeDetails', { id });
     };
 
-    const renderHeader = useCallback(() => (
-        <SafeAreaView style={styles.headerContainer}>
-            <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                    {/* Placeholder for Logo */}
-                    <SCText style={{
-                        fontWeight: 'bold'
-                    }} varient="bold" size={20} color="#fff">HOTSTAR</SCText>
-                </View>
-                <View style={styles.headerRight}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Feather name="cast" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Feather name="search" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </SafeAreaView>
-    ), []);
+    const dispatch = useAppDispatch();
+    const watchlistItems = useAppSelector(selectWatchlist);
 
-    const renderHeroBanner = useCallback(({ item }: { item: HeroBanner }) => (
-        <View style={styles.heroBannerContainer}>
-            <Image
-                source={{ uri: item.imageUrl }}
-                style={styles.heroImage}
-                resizeMode="cover"
-            />
-            <LinearGradient
-                colors={['transparent', 'rgba(5, 1, 13, 0.5)', '#05010D']}
-                locations={[0, 0.6, 1]}
-                style={styles.heroGradient}
+    // const item = data?.rows?.flatMap((row) => row.items)
+
+    // console.log("The Item data are: ", item);
+
+
+    const handleToggleWatchlist = useCallback((heroItem: HeroBanner) => {
+
+        const item = data?.rows?.flatMap((row) => row.items).find((item) => item.id === heroItem.contentId) ?? {
+            id: heroItem.contentId,
+            title: heroItem.title,
+            thumbnailUrl: heroItem.imageUrl
+        }
+
+
+
+        dispatch(toggleWatchList(item))
+
+    }, [data, dispatch]);
+
+    const onRefetch = () => {
+
+        refetch()
+
+    }
+
+
+    const indicator = useSharedValue(1);
+
+    useEffect(() => {
+        indicator.value = withRepeat(
+            withTiming(0, { duration: 600 }),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedDotStyle = useAnimatedStyle(() => ({
+        opacity: indicator.value,
+        transform: [
+            {
+                scale: 0.8 + indicator.value * 0.4,
+            },
+        ],
+    }));
+
+    const renderHeroBanner = useCallback(({ item }: { item: HeroBanner }) => {
+        const isSaved = watchlistItems.some((watchItem) => watchItem.id === item.contentId);
+
+        return (
+            <SafeAreaView style={{
+                width: deviceWidth,
+                height: deviceHeight * 0.65,
+            }}>
+                <Image
+                    source={{ uri: item.imageUrl }}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                    }}
+                    contentFit="cover"
+                />
+                <LinearGradient
+                    colors={COLORS.gradient2}
+                    locations={[0, 0.6, 0.8, 1]}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: '60%',
+                        justifyContent: 'flex-end',
+                        paddingHorizontal: 20,
+                        paddingBottom: 40,
+                    }}
+                >
+                    <View style={{
+                        alignItems: 'center',
+
+                    }}>
+                        <SCText size={28} color={COLORS.white} style={{
+                            textAlign: 'center',
+                            marginBottom: 8,
+                            fontWeight: '700'
+                        }}>
+                            {item.title}
+                        </SCText>
+                        <SCText size={14} color="#ccc" style={{
+                            textAlign: 'center',
+                            marginBottom: 24,
+
+                        }}>
+                            {item.description}
+                        </SCText>
+
+                        {item.isLive && (
+                            <View style={{
+
+                                paddingVertical: 4,
+                                paddingHorizontal: 6,
+                                borderRadius: 4,
+                                backgroundColor: COLORS.white,
+                                position: 'absolute',
+                                left: 5,
+                                bottom: 4
+                            }}>
+                                <View style={{ ...globalStyles.row, gap: 3, }}>
+                                    {/* <SCText color={COLORS.redColor}>.</SCText> */}
+                                    <Animated.View style={[animatedDotStyle, {
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: 4,
+                                        backgroundColor: COLORS.redColor,
+                                        marginRight: 6,
+                                    }]} />
+                                    <SCText size={12} color={COLORS.textBlack}>LIVE</SCText>
+                                </View>
+
+                            </View>
+                        )}
+
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                        }}>
+                            <TouchableOpacity style={styles.playButton} onPress={() => handlePress(item.contentId)}>
+                                <Ionicons name="play" size={20} color={COLORS.textBlack} />
+                                <SCText size={16} color={COLORS.textBlack} style={styles.playButtonText}>Play</SCText>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.listButton} onPress={() => handleToggleWatchlist(item)}>
+                                {/* <Feather name="plus" size={24} color={COLORS.white} /> */}
+                                <Ionicons
+                                    name={isSaved ? "checkmark-circle" : "add-circle-outline"}
+                                    size={28}
+                                    color="white"
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View >
+                </LinearGradient >
+            </SafeAreaView >
+        );
+    }, [watchlistItems, handleToggleWatchlist]);
+
+
+    const HeroSkeleton = () => {
+        return (
+            <SafeAreaView
+                style={{
+                    width: deviceWidth,
+                    height: deviceHeight * 0.65,
+                }}
             >
-                <View style={styles.heroContent}>
-                    <SCText varient="bold" size={28} color="#fff" style={styles.heroTitle}>
-                        {item.title}
-                    </SCText>
-                    <SCText varient="regular" size={14} color="#ccc" style={styles.heroDescription}>
-                        {item.description}
-                    </SCText>
-                    <View style={styles.heroActions}>
-                        <TouchableOpacity style={styles.playButton} onPress={() => handlePress(item.contentId)}>
-                            <Ionicons name="play" size={20} color="#000" />
-                            <SCText varient="semibold" size={16} color="#000" style={styles.playButtonText}>Play</SCText>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.listButton}>
-                            <Feather name="plus" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </LinearGradient>
-        </View>
-    ), []);
+                <Skeleton
+                    animation="wave"
+                    width="100%"
+                    height="100%"
+                />
 
-    const renderContentItem = ({ item }: { item: ContentItem }) => (
-        <TouchableOpacity style={styles.contentItem} onPress={() => handlePress(item.id)}>
-            <Image
-                source={{ uri: item.thumbnailUrl }}
-                style={styles.contentThumbnail}
-                resizeMode="cover"
-            />
-            {item.isPremium && (
-                <View style={styles.premiumBadge}>
-                    <Feather name="star" size={10} color="#FFD700" />
+                <View
+                    style={{
+                        position: "absolute",
+                        bottom: 40,
+                        left: 20,
+                        right: 20,
+                    }}
+                >
                 </View>
-            )}
-        </TouchableOpacity>
-    );
+            </SafeAreaView>
+        );
+    };
 
-    const renderContentRow = ({ item }: { item: ContentRow }) => (
-        <View style={styles.rowContainer}>
-            <SCText varient="semibold" size={18} color="#fff" style={styles.rowTitle}>
-                {item.title}
-            </SCText>
-            <FlatList
-                data={item.items}
-                renderItem={renderContentItem}
-                keyExtractor={(item) => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.rowList}
-            />
-        </View>
-    );
 
     return (
         <GradientWrapper hideGlow>
             <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-            <ScrollView style={styles.container} bounces={false}>
-                <View style={styles.heroSection}>
-                    {data?.heroBanners && (
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefetch} />} style={styles.container} bounces={false}>
+                <View style={{
+                    height: deviceHeight * 0.65,
+
+                }}>
+                    {isFetching || !data ? (
+                        <HeroSkeleton />
+                    ) : (
                         <Carousel
                             loop
-                            width={width}
-                            height={height * 0.65}
-                            autoPlay={true}
+                            width={deviceWidth}
+                            height={deviceHeight * 0.65}
+                            autoPlay
                             data={data.heroBanners}
-                            scrollAnimationDuration={6000}
+                            scrollAnimationDuration={800}
                             renderItem={renderHeroBanner}
-
                         />
                     )}
-                    {renderHeader()}
+                    <SafeAreaView style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                    }}>
+                        <View style={styles.header}>
+                            <View style={{ flex: 1 }}>
+                                <View style={{ ...globalStyles.row, gap: 4 }}>
+                                    <Feather name="star" size={24} color="gold" />
+                                    <SCText style={{
+                                        fontWeight: 'bold'
+                                    }} size={20} color={COLORS.white}>HOTSTAR</SCText>
+                                </View>
+                            </View>
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                                <TouchableOpacity style={{
+                                    marginLeft: 20,
+
+                                }}>
+                                    <Feather name="cast" size={24} color={COLORS.white} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{
+
+                                    marginLeft: 20,
+
+                                }}>
+                                    <Feather name="search" size={24} color={COLORS.white} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </SafeAreaView>
                 </View>
 
-                <View style={styles.contentSection}>
-                    {data?.rows.map((row) => (
-                        <View key={row.id}>
-                            {renderContentRow({ item: row })}
-                        </View>
-                    ))}
+                <View style={{ paddingBottom: 100 }}>
+                    {isFetching || !data ? (
+                        <>
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                        </>
+                    ) : (
+                        data.rows.map((row) => (
+                            <View key={row.id}>
+                                <View style={{ marginBottom: 24 }}>
+                                    <SCText
+                                        size={18}
+                                        color={COLORS.white}
+                                        style={styles.rowTitle}
+                                    >
+                                        {row.title}
+                                    </SCText>
+
+                                    <FlatList
+                                        horizontal
+                                        data={row.items}
+                                        keyExtractor={(item) => item.id}
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={{
+                                            paddingHorizontal: 12,
+                                        }}
+                                        renderItem={({ item }) => (
+                                            <RenderContent
+                                                item={item}
+                                                onPress={() => handlePress(item.id)}
+                                            />
+                                        )}
+                                    />
+                                </View>
+                            </View>
+                        ))
+                    )}
                 </View>
-            </ScrollView>
-        </GradientWrapper>
+                <View style={{ paddingBottom: 100 }}>
+                    {isFetching || !data ? (
+                        <>
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                        </>
+                    ) : (
+                        data.rows.map((row) => (
+                            <View key={row.id}>
+                                <View style={{ marginBottom: 24 }}>
+                                    <SCText
+                                        size={18}
+                                        color={COLORS.white}
+                                        style={styles.rowTitle}
+                                    >
+                                        {row.title}
+                                    </SCText>
+
+                                    <FlatList
+                                        horizontal
+                                        data={row.items}
+                                        keyExtractor={(item) => item.id}
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={{
+                                            paddingHorizontal: 12,
+                                        }}
+                                        renderItem={({ item }) => (
+                                            <RenderContent
+                                                item={item}
+                                                onPress={() => handlePress(item.id)}
+                                            />
+                                        )}
+                                    />
+                                </View>
+                            </View>
+                        ))
+                    )}
+                </View>
+                <View style={{ paddingBottom: 100 }}>
+                    {isFetching || !data ? (
+                        <>
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                            <RowSkeleton />
+                        </>
+                    ) : (
+                        data.rows.map((row) => (
+                            <View key={row.id}>
+                                <View style={{ marginBottom: 24 }}>
+                                    <SCText
+                                        size={18}
+                                        color={COLORS.white}
+                                        style={styles.rowTitle}
+                                    >
+                                        {row.title}
+                                    </SCText>
+
+                                    <FlatList
+                                        horizontal
+                                        data={row.items}
+                                        keyExtractor={(item) => item.id}
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={{
+                                            paddingHorizontal: 12,
+                                        }}
+                                        renderItem={({ item }) => (
+                                            <RenderContent
+                                                item={item}
+                                                onPress={() => handlePress(item.id)}
+                                            />
+                                        )}
+                                    />
+                                </View>
+                            </View>
+                        ))
+                    )}
+                </View>
+            </ScrollView >
+        </GradientWrapper >
     );
 };
 
@@ -151,13 +412,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    headerContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-    },
+
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -165,56 +420,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
     },
-    headerLeft: {
-        flex: 1,
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    iconButton: {
-        marginLeft: 20,
-    },
-    heroSection: {
-        height: height * 0.65,
-    },
-    heroBannerContainer: {
-        width: width,
-        height: height * 0.65,
-    },
-    heroImage: {
-        width: '100%',
-        height: '100%',
-    },
-    heroGradient: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: '60%',
-        justifyContent: 'flex-end',
-        paddingHorizontal: 20,
-        paddingBottom: 40,
-    },
-    heroContent: {
-        alignItems: 'center',
-    },
-    heroTitle: {
-        textAlign: 'center',
-        marginBottom: 8,
-    },
-    heroDescription: {
-        textAlign: 'center',
-        marginBottom: 24,
-    },
-    heroActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-    },
+
     playButton: {
-        backgroundColor: '#fff',
+        backgroundColor: COLORS.white,
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 24,
@@ -232,37 +440,18 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 8,
     },
-    contentSection: {
-        paddingBottom: 100,
-    },
-    rowContainer: {
-        marginBottom: 24,
-    },
+
+
     rowTitle: {
         marginLeft: 16,
         marginBottom: 12,
+        marginTop: 8,
+        fontWeight: 'bold'
     },
-    rowList: {
-        paddingHorizontal: 12,
-    },
-    contentItem: {
-        marginHorizontal: 4,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    contentThumbnail: {
-        width: 120,
-        height: 180,
-        borderRadius: 8,
-    },
-    premiumBadge: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        padding: 4,
-        borderRadius: 12,
-    }
+
+
+
+
 });
 
 export default HomeScreen;

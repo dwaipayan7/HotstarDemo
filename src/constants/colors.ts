@@ -33,4 +33,8 @@ export const COLORS = {
   teriaryColor: "#6420c8",
   gardientColors: ["#05010D", "#140821", "#24103D", "#05010D"],
   lightGray: "#657786",
+  gradient2: ["transparent", "rgba(5, 1, 13, 0.5)", "#05010D"] as any,
+  green: "#46d369",
+  gray: "#aaa",
+  gradient1: "#05010D",
 };

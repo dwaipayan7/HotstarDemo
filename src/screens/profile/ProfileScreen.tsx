@@ -1,10 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import GradientWrapper from '@/components/GradientWrapper';
+import { StyleSheet, View } from 'react-native';
 
 const ProfileScreen = () => {
     return (
-        <View>
-            <Text>ProfileScreen</Text>
-        </View>
+        <GradientWrapper hideGlow>
+            <View>
+
+            </View>
+        </GradientWrapper>
     );
 };
 

@@ -58,6 +58,7 @@ export interface HeroBanner {
   logoUrl?: string;
   ctaText: string;
   badgeText?: string;
+  isLive?: boolean;
 }
 
 export interface ContentRow {
@@ -373,10 +374,16 @@ export const MOCK_HERO_BANNERS: HeroBanner[] = [
       "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1200&q=80",
     ctaText: "Watch Live",
     badgeText: "Live Sport",
+    isLive: true,
   },
 ];
 
 export const MOCK_ROWS: ContentRow[] = [
+  {
+    id: "row0",
+    title: "For You",
+    items: MOCK_CONTENT_DB.filter((item) => item.isTrending).slice(0, 10),
+  },
   {
     id: "row1",
     title: "Latest & Trending",
