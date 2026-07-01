@@ -1,4 +1,5 @@
 import GradientWrapper from '@/components/GradientWrapper';
+import NoDataComponent from '@/components/NoDataComponent';
 import RenderContent from '@/components/RenderContent';
 import { RowSkeleton } from '@/components/RowSkeleton';
 import { COLORS } from '@/constants/colors';
@@ -416,6 +417,14 @@ const HomeScreen = () => {
                                                 onPress={() => handlePress(item.id)}
                                             />
                                         )}
+
+                                        ListEmptyComponent={
+                                            <View style={{
+                                                marginTop: '60%'
+                                            }}>
+                                                <NoDataComponent />
+                                            </View>
+                                        }
                                     />
                                 </View>
                             </View>

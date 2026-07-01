@@ -9,9 +9,6 @@ import * as ExpoSplashScreen from "expo-splash-screen";
 import { useCallback, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
-
-
-
 ExpoSplashScreen.preventAutoHideAsync();
 
 type SplashScreenNavigationProp = StackNavigationProp<RootStackParamList, "SplashScreen">;

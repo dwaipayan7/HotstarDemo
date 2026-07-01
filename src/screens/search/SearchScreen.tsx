@@ -1,6 +1,7 @@
 import Chip from '@/components/Chip';
 import DetailsSheet from '@/components/DetailsSheet';
 import GradientWrapper from '@/components/GradientWrapper';
+import NoDataComponent from '@/components/NoDataComponent';
 import RenderContent from '@/components/RenderContent';
 import { COLORS } from '@/constants/colors';
 import useTheme from '@/hooks/useTheme';
@@ -119,6 +120,14 @@ const SearchScreen = () => {
                             />
                         </View>
                     )}
+
+                    ListEmptyComponent={
+                        <View style={{
+                            marginTop: '60%'
+                        }}>
+                            <NoDataComponent />
+                        </View>
+                    }
                 />
 
                 <DetailsSheet
