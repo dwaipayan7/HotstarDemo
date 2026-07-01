@@ -2,6 +2,7 @@ import GradientWrapper from '@/components/GradientWrapper';
 import RenderContent from '@/components/RenderContent';
 import { RowSkeleton } from '@/components/RowSkeleton';
 import { COLORS } from '@/constants/colors';
+import useTheme from '@/hooks/useTheme';
 import { RootStackParamList } from '@/navigation/MainTabNavigator';
 import { selectWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/store/store';
@@ -15,7 +16,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Skeleton } from '@rneui/base';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     FlatList,
     RefreshControl,
@@ -35,8 +36,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const { data, isLoading, isFetching, refetch } = useHomeData();
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+
+    const { isDark, theme, toggle } = useTheme();
 
     console.log("The Data are: ", data);
+
+    const onRefetch = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await refetch();
+        } catch (error) {
+            setRefreshing(false)
+        } finally {
+            setRefreshing(false)
+
+        }
+    }, [refetch])
 
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -67,11 +83,11 @@ const HomeScreen = () => {
 
     }, [data, dispatch]);
 
-    const onRefetch = () => {
+    // const onRefetch = () => {
 
-        refetch()
+    //     refetch()
 
-    }
+    // }
 
 
     const indicator = useSharedValue(1);
@@ -223,16 +239,17 @@ const HomeScreen = () => {
 
 
     return (
-        <GradientWrapper hideGlow>
-            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <GradientWrapper hideGlow style={{ flex: 1 }} gradientColors={theme.gradientColors}>
+
+            <StatusBar barStyle={isDark ? "light-content" : 'dark-content'} translucent backgroundColor="transparent" />
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefetch} />} style={styles.container} bounces={false}>
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefetch} />} style={styles.container} >
                 <View style={{
                     height: deviceHeight * 0.65,
 
                 }}>
-                    {isFetching || !data ? (
+                    {isLoading || !data ? (
                         <HeroSkeleton />
                     ) : (
                         <Carousel
@@ -273,10 +290,10 @@ const HomeScreen = () => {
                                 </TouchableOpacity>
                                 <TouchableOpacity style={{
 
-                                    marginLeft: 20,
+                                    // marginLeft: 20,
 
                                 }}>
-                                    <Feather name="search" size={24} color={COLORS.white} />
+                                    {/* <Feather name="search" size={24} color={COLORS.white} /> */}
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -284,7 +301,7 @@ const HomeScreen = () => {
                 </View>
 
                 <View style={{ paddingBottom: 100 }}>
-                    {isFetching || !data ? (
+                    {isLoading || !data ? (
                         <>
                             <RowSkeleton />
                             <RowSkeleton />
@@ -297,7 +314,7 @@ const HomeScreen = () => {
                                 <View style={{ marginBottom: 24 }}>
                                     <SCText
                                         size={18}
-                                        color={COLORS.white}
+                                        color={theme.textPrimary}
                                         style={styles.rowTitle}
                                     >
                                         {row.title}
@@ -324,7 +341,7 @@ const HomeScreen = () => {
                     )}
                 </View>
                 <View style={{ paddingBottom: 100 }}>
-                    {isFetching || !data ? (
+                    {isLoading || !data ? (
                         <>
                             <RowSkeleton />
                             <RowSkeleton />
@@ -337,7 +354,8 @@ const HomeScreen = () => {
                                 <View style={{ marginBottom: 24 }}>
                                     <SCText
                                         size={18}
-                                        color={COLORS.white}
+                                        color={theme.textPrimary}
+
                                         style={styles.rowTitle}
                                     >
                                         {row.title}
@@ -364,7 +382,7 @@ const HomeScreen = () => {
                     )}
                 </View>
                 <View style={{ paddingBottom: 100 }}>
-                    {isFetching || !data ? (
+                    {isLoading || !data ? (
                         <>
                             <RowSkeleton />
                             <RowSkeleton />
@@ -377,7 +395,8 @@ const HomeScreen = () => {
                                 <View style={{ marginBottom: 24 }}>
                                     <SCText
                                         size={18}
-                                        color={COLORS.white}
+                                        color={theme.textPrimary}
+
                                         style={styles.rowTitle}
                                     >
                                         {row.title}

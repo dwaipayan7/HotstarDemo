@@ -4,6 +4,7 @@ import { persistReducer, persistStore } from "redux-persist";
 // import AuthSlice from "../slices/AuthSlice
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import snackbarReducer from "../slices/snackbarSlice";
+import themeSlice from "../slices/themeSlice";
 import watchListSlice from "../slices/watchlistSlice";
 
 const persistConfig = {
@@ -15,17 +16,25 @@ const persistWatchListConfig = {
   storage: AsyncStorage,
 };
 
+const persistThemeConfig = {
+  key: "theme",
+  storage: AsyncStorage,
+}
+
 const persistedSnackBarSlice = persistReducer(persistConfig, snackbarReducer);
 const persistedWatchlistSlice = persistReducer(
   persistWatchListConfig,
   watchListSlice,
 );
 
+const persistedThemeSlice = persistReducer(persistThemeConfig, themeSlice)
+
 export const store = configureStore({
   reducer: {
     snackbar: persistedSnackBarSlice,
     // auth: persistedAuthSlice,
     watchlist: persistedWatchlistSlice,
+    theme: persistedThemeSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

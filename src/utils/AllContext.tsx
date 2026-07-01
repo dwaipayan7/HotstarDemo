@@ -1,22 +1,18 @@
-import { ReactNode } from "react";
-import { Dimensions, Platform, ViewStyle } from "react-native";
+import { Dimensions, Linking } from "react-native";
 import { useNavigationMode } from "react-native-navigation-mode";
-import { Linking } from "react-native";
-import ReactNativeBlobUtil, {
-    ReactNativeBlobUtilConfig,
-} from "react-native-blob-util";
+// import ReactNativeBlobUtil, {
+//     ReactNativeBlobUtilConfig,
+// } from "react-native-blob-util";
 
 // import { TSnackbarVariant } from "@/types";
 // import RNFetchBlobUtil, { ReactNativeBlobUtil } from 'react-native-blob-util'
-import { SafeAreaView } from "react-native-safe-area-context";
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
-import { PermissionsAndroid } from "react-native";
+// import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 // import { setMessage } from "@/redux/slices/AuthSlice";
 import { store } from "@/redux/store/store";
 // import { API_BASE_URL } from "./api";
-import dayjs from "dayjs";
 import { hideSnackbar, setMessage } from "@/redux/slices/snackbarSlice";
 import { TSnackbarVariant } from "@/services/mockData";
+import dayjs from "dayjs";
 // Avoid calling React hooks at module scope. Use the Redux store token when
 // making non-component requests.
 
@@ -35,7 +31,6 @@ export const rs = (small: number, normal: number, tablet: number): number => {
     return normal;
 };
 
-export const APP_URL = "https://appuat.sponsicore.com/API/App/Employee";
 
 export enum ErrorMessage {
     NETWORK_ERROR = "Network Error!. Please try again later.",
@@ -318,65 +313,65 @@ export const showMessage = (message: string, variant?: TSnackbarVariant) => {
     }, 4000);
 };
 
-const requestStoragePermission = async (): Promise<boolean> => {
-    if (Platform.OS !== "android") return true;
+// const requestStoragePermission = async (): Promise<boolean> => {
+//     if (Platform.OS !== "android") return true;
 
-    const androidVersion = Platform.Version as number;
+//     const androidVersion = Platform.Version as number;
 
-    try {
-        if (androidVersion >= 33) {
-            const granted = await PermissionsAndroid.requestMultiple([
-                PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-                PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
-            ]);
+//     try {
+//         if (androidVersion >= 33) {
+//             const granted = await PermissionsAndroid.requestMultiple([
+//                 PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+//                 PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+//             ]);
 
-            return (
-                granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] ===
-                PermissionsAndroid.RESULTS.GRANTED ||
-                granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] ===
-                PermissionsAndroid.RESULTS.GRANTED
-            );
-        }
+//             return (
+//                 granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] ===
+//                 PermissionsAndroid.RESULTS.GRANTED ||
+//                 granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] ===
+//                 PermissionsAndroid.RESULTS.GRANTED
+//             );
+//         }
 
-        if (androidVersion >= 29) {
-            return true;
-        }
+//         if (androidVersion >= 29) {
+//             return true;
+//         }
 
-        const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            {
-                title: "Storage Permission",
-                message: "App needs access to storage to download files.",
-                buttonPositive: "Allow",
-                buttonNegative: "Deny",
-            },
-        );
+//         const granted = await PermissionsAndroid.request(
+//             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+//             {
+//                 title: "Storage Permission",
+//                 message: "App needs access to storage to download files.",
+//                 buttonPositive: "Allow",
+//                 buttonNegative: "Deny",
+//             },
+//         );
 
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch {
-        return false;
-    }
-};
+//         return granted === PermissionsAndroid.RESULTS.GRANTED;
+//     } catch {
+//         return false;
+//     }
+// };
 
-const saveToGallery = async (
-    filePath: string,
-    mimeType: string,
-): Promise<boolean> => {
-    const isImage = mimeType.startsWith("image/");
+// const saveToGallery = async (
+//     filePath: string,
+//     mimeType: string,
+// ): Promise<boolean> => {
+//     const isImage = mimeType.startsWith("image/");
 
-    if (!isImage) return false;
+//     if (!isImage) return false;
 
-    try {
-        await CameraRoll.saveAsset(`file://${filePath}`, {
-            type: "photo",
-            album: "Downloads",
-        });
-        return true;
-    } catch (err) {
-        console.warn("CameraRoll save failed:", err);
-        return false;
-    }
-};
+//     try {
+//         await CameraRoll.saveAsset(`file://${filePath}`, {
+//             type: "photo",
+//             album: "Downloads",
+//         });
+//         return true;
+//     } catch (err) {
+//         console.warn("CameraRoll save failed:", err);
+//         return false;
+//     }
+// };
 
 // export const downloadAttachment = async (
 //   id: string,

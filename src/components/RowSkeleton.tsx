@@ -17,7 +17,7 @@ export const RowSkeleton = () => {
 
             <FlatList
                 horizontal
-                data={[1, 2, 3, 4, 5]}
+                data={[1, 1, 1, 1, 1]}
                 keyExtractor={(item) => item.toString()}
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{

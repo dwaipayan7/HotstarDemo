@@ -1,3 +1,5 @@
+import { COLORS } from '@/constants/colors';
+import useTheme from '@/hooks/useTheme';
 import HomeScreen from '@/screens/home/HomeScreen';
 import ProfileScreen from '@/screens/profile/ProfileScreen';
 import SearchScreen from '@/screens/search/SearchScreen';
@@ -21,26 +23,23 @@ export type MainTabParamList = {
 };
 
 
-declare global {
-  namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList { }
-  }
-}
-
-
 const BottomTab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
+
+  const { isDark, theme, toggle } = useTheme();
+
+
   const insets = useSafeAreaInsets();
 
   return (
     <BottomTab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#1DA1F2',
-        tabBarInactiveTintColor: '#657786',
+        tabBarActiveTintColor: COLORS.tabActiveColor,
+        tabBarInactiveTintColor: COLORS.tabInactiveColor,
         tabBarStyle: {
-          backgroundColor: '#05010D',
+          backgroundColor: isDark ? COLORS.backgroundColor : COLORS.divider,
           height: 50 + insets.bottom,
           paddingTop: 8,
         },

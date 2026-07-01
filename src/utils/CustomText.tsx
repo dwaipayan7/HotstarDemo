@@ -1,34 +1,33 @@
-
-
 import { isSmallDeviceWidth } from '@/utils/AllContext';
-import { StyleSheet, Text, TextProps } from 'react-native';
+import { Text, TextProps, TextStyle } from 'react-native';
+
 interface ITextProps extends TextProps {
     varient?: 'regular' | 'medium' | 'semibold' | 'bold';
     size?: number;
     color?: string;
 }
 
-// export const font = (size: number) => isMobile && size ||  isSmallDeviceWidth && size - 2 || size + 4
-
 export const font = (size: number) => {
     if (isSmallDeviceWidth) return size - 1;
     return size;
 };
 
-const SCText = ({ varient = 'regular', color, size = 14, style, ...props }: ITextProps) => {
 
-    const getFontFamily = () => {
-        switch (varient) {
-            case 'regular': return 'Figtree-Regular';
-            case 'medium': return 'Figtree-Medium';
-            case 'semibold': return 'Figtree-SemiBold';
-            case 'bold': return 'Figtree-Bold';
-            default: return 'Figtree-Regular';
-        }
-    };
+const WEIGHT_MAPPING: Record<string, TextStyle['fontWeight']> = {
+    regular: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '900',
+};
 
-    // console.log("THe COlor is: ", color);
-
+const SCText = ({
+    varient = 'regular',
+    color,
+    size = 14,
+    style,
+    children,
+    ...props
+}: ITextProps) => {
 
     return (
         <Text
@@ -36,18 +35,16 @@ const SCText = ({ varient = 'regular', color, size = 14, style, ...props }: ITex
             {...props}
             style={[
                 {
-                    fontFamily: getFontFamily(),
                     fontSize: font(size),
-                    color: color,
+                    fontWeight: WEIGHT_MAPPING[varient],
+                    ...(color && { color }),
                 },
                 style,
             ]}
         >
-            {props.children}
-        </Text >
+            {children}
+        </Text>
     );
 };
 
-export default SCText
-
-const styles = StyleSheet.create({})
+export default SCText;

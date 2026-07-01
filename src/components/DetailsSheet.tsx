@@ -1,5 +1,4 @@
 import { COLORS } from '@/constants/colors';
-import { videoSource } from '@/screens/home/HomeDetailsScreen';
 import { useContentDetails } from '@/services/contentService';
 import { deviceHeight, deviceWidth } from '@/utils/AllContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,11 +12,13 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Video from 'react-native-video';
+
+import { selectInWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/store/store';
+import { VIDEO_SOURCE } from '@/utils/video';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import ContentCardDetails from './ContentCardDetails';
 import ContentCardDetailsSkeleton from './ContentCardDetailsSkeleton';
-
-
 interface Props {
     show: boolean;
     close: () => void;
@@ -51,7 +52,33 @@ const DetailsSheet = ({ show, close, id }: Props) => {
 
     const { data: content, isFetching } = useContentDetails(id ?? '');
 
+    const player = useVideoPlayer(VIDEO_SOURCE, (player) => {
+        player.loop = true;
+        player.play();
+    });
 
+    useEffect(() => {
+        player.muted = isMuted;
+    }, [isMuted]);
+
+    useEffect(() => {
+        setLoading(true);
+        setShowVideo(false);
+
+        const timer = setTimeout(() => {
+            setShowVideo(true);
+            setLoading(false);
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [VIDEO_SOURCE]);
+
+    // const dispatch = useAppDispatch();
+    // const isSaved = useAppSelector(selectInWatchlist(item.id));
+
+    // const handleToggle = () => {
+    //     dispatch(toggleWatchList(item?.data?.id));
+    // };
 
     return (
         // <ActionSheet
@@ -99,26 +126,17 @@ const DetailsSheet = ({ show, close, id }: Props) => {
                             </View>
                         )} */}
 
+
                         {showVideo && (
-                            <Video
-                                ref={videoRef}
-                                source={{ uri: videoSource }}
+                            <VideoView
                                 style={styles.video}
-                                controls
-                                resizeMode="contain"
-                                // paused={false}
-                                repeat
-                                muted={isMuted}
-                                onLoad={() => setLoading(false)}
-                                onError={(e) => {
-                                    setLoading(false);
-                                    console.log(e);
-                                }}
-                                onBuffer={({ isBuffering }) => {
-                                    console.log("The Buffering is: ", isBuffering);
-                                    // getting type of boolean
-                                    setLoading(isBuffering);
-                                }}
+                                player={player}
+                                allowsPictureInPicture
+                                nativeControls
+                                contentFit="contain"
+                                onFirstFrameRender={() => setLoading(false)}
+                                onPictureInPictureStart={() => console.log('PiP started')}
+                                onPictureInPictureStop={() => console.log('PiP stopped')}
                             />
                         )}
 
@@ -131,7 +149,7 @@ const DetailsSheet = ({ show, close, id }: Props) => {
                             <Ionicons name="close" size={22} color={COLORS.white} />
                         </TouchableOpacity>
 
-                        {showVideo && videoSource && (
+                        {showVideo && (
                             <TouchableOpacity
                                 style={styles.muteButton}
                                 onPress={() => setIsMuted(prev => !prev)}
@@ -286,3 +304,24 @@ const styles = StyleSheet.create({
     },
     fullLoader: { paddingVertical: 40, alignItems: 'center' },
 });
+
+// <Video
+//     ref={videoRef}
+//     source={{ uri: VIDEO_SOURCE }}
+//     style={styles.video}
+//     controls
+//     resizeMode="contain"
+//     // paused={false}
+//     repeat
+//     muted={isMuted}
+//     onLoad={() => setLoading(false)}
+//     onError={(e) => {
+//         setLoading(false);
+//         console.log(e);
+//     }}
+//     onBuffer={({ isBuffering }) => {
+//         console.log("The Buffering is: ", isBuffering);
+//         // getting type of boolean
+//         setLoading(isBuffering);
+//     }}
+// />

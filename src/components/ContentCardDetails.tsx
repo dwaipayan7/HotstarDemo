@@ -2,13 +2,29 @@ import { COLORS } from '@/constants/colors'
 import { selectInWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice'
 import { useAppDispatch, useAppSelector } from '@/redux/store/store'
 
+import useTheme from '@/hooks/useTheme'
 import SCText from '@/utils/CustomText'
+import { globalStyles } from '@/utils/globalStyles'
 import { Ionicons } from '@expo/vector-icons'
 import { memo } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import ContentCardDetailsSkeleton from './ContentCardDetailsSkeleton'
 
-const ContentCardDetails = memo(({ item, loading }: { item: any, loading?: boolean }) => {
+interface Props {
+    item: any;
+    loading?: boolean;
+    isPlaying?: boolean;
+    onPlayPause?: () => void;
+    onDownload?: () => void;
+    onShare?: () => void;
+}
+
+const ContentCardDetails = memo(({ item,
+    loading,
+    isPlaying = false,
+    onPlayPause,
+    onDownload,
+    onShare, }: Props) => {
 
     const dispatch = useAppDispatch();
     const isSaved = useAppSelector(selectInWatchlist(item.id));
@@ -17,8 +33,10 @@ const ContentCardDetails = memo(({ item, loading }: { item: any, loading?: boole
         dispatch(toggleWatchList(item?.data?.id));
     };
 
+    const { theme, isDark, toggle } = useTheme();
+
     return (
-        <View style={styles.itemContainer}>
+        <View style={[styles.itemContainer, { backgroundColor: theme.surface }]}>
 
 
             {loading ? (
@@ -30,49 +48,59 @@ const ContentCardDetails = memo(({ item, loading }: { item: any, loading?: boole
                             fontSize: 18,
                             marginBottom: 6,
                             fontWeight: 'bold'
-                        }} color={COLORS.white}>{item?.data?.title}</SCText>
+                        }} color={theme.textPrimary}>{item?.data?.title}</SCText>
                     </View>
                     <View style={styles.metaInfo}>
                         <SCText size={13} color={COLORS.green} style={styles.matchText}>
                             {98}% Match
                         </SCText>
-                        <SCText size={13} color={COLORS.gray}>
+                        <SCText size={13} color={theme.textSecondary}>
                             {item?.data?.releaseYear}
                         </SCText>
-                        <View style={styles.dot} />
-                        <SCText size={13} color={COLORS.gray}>
+                        <View style={[styles.dot, { backgroundColor: theme.textSecondary }]} />
+                        <SCText size={13} color={theme.textSecondary}>
                             {item?.data?.duration ?? `${item?.data?.totalSeasons} Seasons`}
                         </SCText>
-                        <View style={styles.ratingPill}>
-                            <SCText size={11} color={COLORS.white}>
+                        <View style={[styles.ratingPill, { borderColor: theme.textSecondary }]}>
+                            <SCText size={11} color={theme.textPrimary}>
                                 {item?.data?.rating}
                             </SCText>
                         </View>
                     </View>
 
-                    <TouchableOpacity style={styles.playButton}>
-                        <Ionicons name="play" size={20} color={COLORS.textBlack} />
-                        <SCText size={16} color={COLORS.textBlack} style={styles.playText}>
-                            Play
+                    <TouchableOpacity style={{
+                        ...globalStyles.row,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: theme.textPrimary,
+                        borderRadius: 6,
+                        paddingVertical: 12,
+                        marginBottom: 16,
+                    }}
+                        onPress={onPlayPause}
+                    >
+                        <Ionicons name={isPlaying ? "pause" : "play"} size={20} color={isDark ? COLORS.textBlack : COLORS.white} />
+                        <SCText size={16} color={isDark ? COLORS.textBlack : COLORS.white} style={styles.playText}>
+                            {isPlaying ? "Pause" : "Play"}
                         </SCText>
                     </TouchableOpacity>
 
                     <View style={styles.actionRow}>
                         <TouchableOpacity style={styles.actionItem} onPress={handleToggle}>
-                            <Ionicons name={isSaved ? "checkmark-circle" : "add-circle-outline"} size={22} color={COLORS.white} />
-                            <SCText size={11} color={COLORS.gray100}>{isSaved ? "Watchlisted" : "Watchlist"}</SCText>
+                            <Ionicons name={isSaved ? "checkmark-circle" : "add-circle-outline"} size={22} color={theme.textSecondary} />
+                            <SCText size={11} color={theme.textSecondary}>{isSaved ? "Watchlisted" : "Watchlist"}</SCText>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionItem}>
-                            <Ionicons name="download-outline" size={20} color={COLORS.white} />
-                            <SCText size={11} color={COLORS.gray100}>Download</SCText>
+                        <TouchableOpacity style={styles.actionItem} onPress={onDownload}>
+                            <Ionicons name="download-outline" size={20} color={theme.textSecondary} />
+                            <SCText size={11} color={theme.textSecondary}>Download</SCText>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionItem}>
-                            <Ionicons name="share-social-outline" size={20} color={COLORS.white} />
-                            <SCText size={11} color={COLORS.gray100}>Share</SCText>
+                        <TouchableOpacity style={styles.actionItem} onPress={onShare}>
+                            <Ionicons name="share-social-outline" size={20} color={theme.textSecondary} />
+                            <SCText size={11} color={theme.textSecondary}>Share</SCText>
                         </TouchableOpacity>
                     </View>
 
-                    <SCText size={15} color={COLORS.gray100} style={styles.description}>
+                    <SCText size={15} color={theme.textSecondary} style={styles.description}>
                         {item?.data?.description}
                     </SCText>
 
@@ -84,8 +112,17 @@ const ContentCardDetails = memo(({ item, loading }: { item: any, loading?: boole
 
                     <View style={styles.tagsContainer}>
                         {item?.data?.genres?.map((genre: any) => (
-                            <View key={genre.id} style={styles.tag}>
-                                <SCText size={12} color={COLORS.white}>{genre.name}</SCText>
+                            <View key={genre.id} style={{
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : theme.card,
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                borderRadius: 16,
+                                marginRight: 8,
+                                marginBottom: 8,
+                                borderWidth: 1,
+                                borderColor: theme.border,
+                            }}>
+                                <SCText size={12} color={theme.textSecondary}>{genre.name}</SCText>
                             </View>
                         ))}
                     </View>
@@ -129,14 +166,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
-    tag: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        marginRight: 8,
-        marginBottom: 8,
-    },
+
 
 
     matchText: { fontWeight: '700' },
@@ -144,25 +174,15 @@ const styles = StyleSheet.create({
         width: 3,
         height: 3,
         borderRadius: 2,
-        backgroundColor: COLORS.gray,
     },
 
     ratingPill: {
         borderWidth: 1,
-        borderColor: COLORS.gray,
         paddingHorizontal: 6,
         paddingVertical: 1,
         borderRadius: 3,
     },
-    playButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.white,
-        borderRadius: 6,
-        paddingVertical: 12,
-        marginBottom: 16,
-    },
+
     playText: { fontWeight: '700', marginLeft: 6 },
     actionRow: {
         flexDirection: 'row',

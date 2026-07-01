@@ -1,4 +1,5 @@
 import { COLORS } from '@/constants/colors';
+import useTheme from '@/hooks/useTheme';
 import { formatText } from '@/utils/AllContext';
 import SCText from '@/utils/CustomText';
 import { Icon } from '@/utils/Icons';
@@ -77,6 +78,9 @@ const Header = ({
     onRightActions,
     onLeftActions,
 }: HeaderProps) => {
+
+    const { theme, isDark, toggle } = useTheme();
+
     return (
         <View style={{
             flexDirection: 'row',
@@ -138,7 +142,7 @@ const Header = ({
                         <Ionicons
                             name="arrow-back"
                             size={24}
-                            color={COLORS.white}
+                            color={theme.textPrimary}
                         />
                     </TouchableOpacity>
                 )}
@@ -238,7 +242,7 @@ const Header = ({
 
                     {extraTitle && (
                         <SCText
-                            color='white'
+                            color={theme.textPrimary}
                         >
                             {extraTitle}
                         </SCText>

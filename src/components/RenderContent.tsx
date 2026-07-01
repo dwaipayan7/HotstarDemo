@@ -7,7 +7,10 @@ import { FontAwesome } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
-const RenderContent = ({ item, onPress }: { item: ContentItem, onPress: (id: string) => void }) => {
+const RenderContent = ({ item, onPress, isWidth }: { item: ContentItem, onPress: (id: string) => void, isWidth?: boolean }) => {
+
+    // const getAllItems = useSelector(selectInWatchlist(item.id))
+
     const dispatch = useAppDispatch();
     const isSaved = useAppSelector(selectInWatchlist(item.id));
 
@@ -17,7 +20,12 @@ const RenderContent = ({ item, onPress }: { item: ContentItem, onPress: (id: str
 
     return (
         <TouchableOpacity
-            style={styles.card}
+            style={{
+                marginHorizontal: 5,
+                borderRadius: 8,
+                overflow: 'hidden',
+                ...(isWidth ? { width: '82%' } : {}),
+            }}
             onPress={() => onPress(item.id)}
         >
             <Image
@@ -50,11 +58,7 @@ const RenderContent = ({ item, onPress }: { item: ContentItem, onPress: (id: str
 export default RenderContent
 
 const styles = StyleSheet.create({
-    card: {
-        marginHorizontal: 5,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
+
     thumbnail: {
         width: 120,
         height: 200,

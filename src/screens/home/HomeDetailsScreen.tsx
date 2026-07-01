@@ -13,17 +13,19 @@ import SCText from '@/utils/CustomText';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Skeleton } from '@rneui/base';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Video, { VideoRef } from 'react-native-video';
-
-
-export const videoSource = 'https://www.w3schools.com/html/mov_bbb.mp4';
-
+// import Video, { VideoRef } from 'react-native-video';
+import useTheme from '@/hooks/useTheme';
+import { VIDEO_SOURCE } from '@/utils/video';
+import { useVideoPlayer, VideoView } from 'expo-video';
+// export const videoSource = 'https://www.w3schools.com/html/mov_bbb.mp4';
+import * as Sharing from 'expo-sharing';
 
 const HomeDetailsScreen = () => {
 
+    const { theme, isDark, toggle } = useTheme();
 
     const ContentDetailsSkeleton = () => {
         return (
@@ -105,13 +107,13 @@ const HomeDetailsScreen = () => {
     const { data: content, isFetching: isFetchingContent } = useContentDetails(id);
 
 
-
+    const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
     console.log("The COntents are: ", content);
 
 
     const showSkeleton = !content && isFetchingContent;
-    const videoRef = useRef<VideoRef>(null);
+    // const videoRef = useRef<VideoRef>(null);
 
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -119,6 +121,12 @@ const HomeDetailsScreen = () => {
     const [showVideo, setShowVideo] = useState<boolean>(false);
     const [showDetails, setShowDetails] = useState<boolean>(false)
     const [getid, setId] = useState('')
+    const [download, setDownload] = useState<boolean>(false)
+
+
+    const handleShare = async () => {
+        await Sharing.shareAsync(VIDEO_SOURCE);
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -147,8 +155,80 @@ const HomeDetailsScreen = () => {
 
     };
 
+    const player = useVideoPlayer(VIDEO_SOURCE, (player) => {
+        player.loop = true;
+        // player.play();
+
+    });
+
+
+    const handlePlayPause = () => {
+        if (isPlaying) {
+            player.pause();
+        } else {
+            player.play();
+        }
+
+        setIsPlaying(prev => !prev)
+    }
+
+
+
+    useEffect(() => {
+        player.muted = isMuted;
+    }, [isMuted]);
+
+    useEffect(() => {
+        setLoading(true);
+        setShowVideo(false);
+
+        const timer = setTimeout(() => {
+            setShowVideo(true);
+            setLoading(false);
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [VIDEO_SOURCE]);
+
+
+    // useEvent(player, 'statusChange', ({ status, error } ) => {
+    //     if (status === 'readyToPlay') {
+    //         setLoading(false);
+    //     }
+
+    //     if (status === 'loading') {
+    //         setLoading(true);
+    //     }
+
+    //     if (error) {
+    //         console.log(error);
+    //         setLoading(false);
+    //     }
+    // });
+
+    const handleDownload = () => {
+        setDownload(prev => !prev)
+    }
+
+    if (download) {
+
+        Alert.alert("Download soon..", "This is a demo body", [
+            {
+                text: 'Ok',
+                onPress: () => setDownload(false),
+                style: 'destructive'
+            }, {
+                text: 'Cancel',
+                onPress: () => setDownload(false),
+                style: 'cancel'
+            }
+        ])
+
+    }
+
+
     return (
-        <GradientWrapper hideGlow>
+        <GradientWrapper style={{ flex: 1 }} gradientColors={theme.gradientColors} hideGlow>
 
             <SafeAreaView style={{ flex: 1 }}>
 
@@ -181,25 +261,36 @@ const HomeDetailsScreen = () => {
                                     ) : null}
 
                                     {showVideo && (
-                                        <Video
-                                            ref={videoRef}
-                                            source={{ uri: videoSource }}
+                                        // <Video
+                                        //     ref={videoRef}
+                                        //     source={{ uri: VIDEO_SOURCE }}
+                                        //     style={styles.video}
+                                        //     controls
+                                        //     resizeMode="contain"
+                                        //     // paused={false}
+                                        //     repeat
+                                        //     muted={isMuted}
+                                        //     onLoad={() => setLoading(false)}
+                                        //     onError={(e) => {
+                                        //         setLoading(false);
+                                        //         console.log(e);
+                                        //     }}
+                                        //     onBuffer={({ isBuffering }) => {
+                                        //         console.log("The Buffering is: ", isBuffering);
+                                        //         // getting type of boolean
+                                        //         setLoading(isBuffering);
+                                        //     }}
+                                        // />
+
+                                        <VideoView
                                             style={styles.video}
-                                            controls
-                                            resizeMode="contain"
-                                            // paused={false}
-                                            repeat
-                                            muted={isMuted}
-                                            onLoad={() => setLoading(false)}
-                                            onError={(e) => {
-                                                setLoading(false);
-                                                console.log(e);
-                                            }}
-                                            onBuffer={({ isBuffering }) => {
-                                                console.log("The Buffering is: ", isBuffering);
-                                                // getting type of boolean
-                                                setLoading(isBuffering);
-                                            }}
+                                            player={player}
+                                            allowsPictureInPicture
+                                            nativeControls
+                                            contentFit="contain"
+                                            onFirstFrameRender={() => setLoading(false)}
+                                            onPictureInPictureStart={() => console.log('PiP started')}
+                                            onPictureInPictureStop={() => console.log('PiP stopped')}
                                         />
                                     )}
                                 </View>
@@ -207,7 +298,7 @@ const HomeDetailsScreen = () => {
                         )
                     }
 
-                    {showVideo && videoSource && (
+                    {showVideo && (
                         <TouchableOpacity
                             style={styles.muteButton}
                             onPress={() => setIsMuted(prev => !prev)}
@@ -245,8 +336,21 @@ const HomeDetailsScreen = () => {
                     )} */}
 
                     {!showSkeleton && (
-                        <ContentCardDetails loading={showSkeleton} item={content} />
+                        <ContentCardDetails loading={showSkeleton} item={content}
+                            isPlaying={isPlaying}
+                            onPlayPause={handlePlayPause}
+                            onShare={handleShare}
+                            onDownload={handleDownload}
+                        />
                     )}
+
+                    <SCText
+                        size={18}
+                        color={theme.textPrimary}
+                        style={styles.rowTitle}
+                    >
+                        {"Suggetions for you"}
+                    </SCText>
 
                     <View style={{ paddingBottom: 100 }}>
                         {showSkeleton || !data ? (
@@ -260,9 +364,10 @@ const HomeDetailsScreen = () => {
                             data.rows.map((row) => (
                                 <View key={row.id}>
                                     <View style={{ marginBottom: 24 }}>
+
                                         <SCText
                                             size={18}
-                                            color={COLORS.white}
+                                            color={theme.textPrimary}
                                             style={styles.rowTitle}
                                         >
                                             {row.title}

@@ -1,3 +1,4 @@
+import { COLORS } from "@/constants/colors";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
@@ -5,17 +6,19 @@ import { StyleSheet, ViewStyle } from "react-native";
 interface GradientWrapperProps {
     children: React.ReactNode;
     style?: ViewStyle;
-    hideGlow?: boolean
+    hideGlow?: boolean;
+    gradientColors?: string[]
 }
 
 const GradientWrapper = ({
     children,
     style,
-    hideGlow
+    hideGlow = false,
+    gradientColors
 }: GradientWrapperProps) => {
     return (
         <LinearGradient
-            colors={["#05010D", "#140821", "#24103D", "#05010D"]}
+            colors={gradientColors ?? COLORS.gardientColors}
             locations={[0, 0.4, 0.75, 1]}
             style={[styles.container, style]}
         >
