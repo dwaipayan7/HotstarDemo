@@ -20,7 +20,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useTheme from '@/hooks/useTheme';
 import { VIDEO_SOURCE } from '@/utils/video';
 import { useVideoPlayer, VideoView } from 'expo-video';
-// export const videoSource = 'https://www.w3schools.com/html/mov_bbb.mp4';
 import * as Sharing from 'expo-sharing';
 
 const HomeDetailsScreen = () => {
@@ -107,7 +106,6 @@ const HomeDetailsScreen = () => {
     const { data: content, isFetching: isFetchingContent } = useContentDetails(id);
 
 
-    const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
     console.log("The COntents are: ", content);
 
@@ -116,6 +114,7 @@ const HomeDetailsScreen = () => {
     // const videoRef = useRef<VideoRef>(null);
 
 
+    const [isPlaying, setIsPlaying] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(true);
     const [showVideo, setShowVideo] = useState<boolean>(false);

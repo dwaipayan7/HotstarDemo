@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
+    Alert,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
@@ -13,12 +14,12 @@ import {
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectInWatchlist, toggleWatchList } from '@/redux/slices/watchlistSlice';
-import { useAppDispatch, useAppSelector } from '@/redux/store/store';
 import { VIDEO_SOURCE } from '@/utils/video';
+import * as Sharing from 'expo-sharing';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import ContentCardDetails from './ContentCardDetails';
 import ContentCardDetailsSkeleton from './ContentCardDetailsSkeleton';
+
 interface Props {
     show: boolean;
     close: () => void;
@@ -37,9 +38,19 @@ const DetailsSheet = ({ show, close, id }: Props) => {
 
 
     // const [fetching, setFetching] = useState(false);
-    const [showVideo, setShowVideo] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [isMuted, setIsMuted] = useState(true);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [showVideo, setShowVideo] = useState<boolean>(false);
+    const [showDetails, setShowDetails] = useState<boolean>(false)
+    const [getid, setId] = useState('')
+    const [download, setDownload] = useState<boolean>(false)
+    const [isPlaying, setIsPlaying] = useState<boolean>(false)
+
+
+    const handleShare = async () => {
+        await Sharing.shareAsync(VIDEO_SOURCE);
+    };
+
 
     useEffect(() => {
         setLoading(true);
@@ -54,8 +65,22 @@ const DetailsSheet = ({ show, close, id }: Props) => {
 
     const player = useVideoPlayer(VIDEO_SOURCE, (player) => {
         player.loop = true;
-        player.play();
+        // player.play();
+
     });
+
+
+    const handlePlayPause = () => {
+        if (isPlaying) {
+            player.pause();
+        } else {
+            player.play();
+        }
+
+        setIsPlaying(prev => !prev)
+    }
+
+
 
     useEffect(() => {
         player.muted = isMuted;
@@ -79,6 +104,27 @@ const DetailsSheet = ({ show, close, id }: Props) => {
     // const handleToggle = () => {
     //     dispatch(toggleWatchList(item?.data?.id));
     // };
+
+    const handleDownload = () => {
+        setDownload(prev => !prev)
+    }
+
+    if (download) {
+
+        Alert.alert("Download soon..", "This is a demo body", [
+            {
+                text: 'Ok',
+                onPress: () => setDownload(false),
+                style: 'destructive'
+            }, {
+                text: 'Cancel',
+                onPress: () => setDownload(false),
+                style: 'cancel'
+            }
+        ])
+
+    }
+
 
     return (
         // <ActionSheet
@@ -172,7 +218,13 @@ const DetailsSheet = ({ show, close, id }: Props) => {
 
 
                     {content?.data ? (
-                        <ContentCardDetails item={content} />
+                        <ContentCardDetails item={content}
+                            isPlaying={isPlaying}
+                            onPlayPause={handlePlayPause}
+                            onShare={handleShare}
+                            onDownload={handleDownload}
+                            loading={loading}
+                        />
                     ) : <ContentCardDetailsSkeleton />}
 
                     {/* {isFetching && (

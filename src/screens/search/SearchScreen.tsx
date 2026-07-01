@@ -5,8 +5,8 @@ import RenderContent from '@/components/RenderContent';
 import { COLORS } from '@/constants/colors';
 import useTheme from '@/hooks/useTheme';
 import { useHomeData } from '@/services/homeService';
+import { useSearch } from '@/services/searchService';
 import { globalStyles } from '@/utils/globalStyles';
-import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ const SearchScreen = () => {
     const { data, isLoading, isFetching, refetch } = useHomeData();
 
     console.log("Getting the data are: ", data);
+
 
 
     // const navigation = useNavigation<any>();
@@ -45,15 +46,39 @@ const SearchScreen = () => {
 
     const [getId, setId] = useState<string>('')
     const [showDetails, setShowDetails] = useState<boolean>(false)
+    const [text, setText] = useState<string>('')
+
+    const searchQuery = text || selectedChip.join(',')
+    const { data: searchedData } = useSearch(searchQuery)
+    // already delayed no need to debouncing
+
+    // console.log("The searched data is: ", searchedData);
+
+    const displayItems =
+        searchQuery.trim().length > 0
+            ? (searchedData?.data?.items || [])
+            : allItems;
+
+    console.log("The display names are: ", displayItems);
+
 
     return (
         <GradientWrapper style={{ flex: 1 }} gradientColors={theme.gradientColors} hideGlow>
             <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.surface }]}>
 
                 <TextInput
-                    placeholder='Search Entertainment'
+                    placeholder="Search Entertainment"
                     placeholderTextColor="#888"
-                    style={styles.searchInput}
+                    style={{
+                        height: 45,
+                        borderWidth: 1,
+                        borderColor: COLORS.divider,
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        color: theme.textPrimary
+                    }}
+                    value={text}
+                    onChangeText={setText}
                 />
 
 
@@ -79,7 +104,7 @@ const SearchScreen = () => {
 
 
                 <FlatList
-                    data={allItems}
+                    data={displayItems}
                     keyExtractor={(item) => item.id}
                     numColumns={3}
                     showsVerticalScrollIndicator={false}
@@ -118,14 +143,6 @@ const styles = StyleSheet.create({
         gap: 10,
         padding: 16,
         paddingBottom: 0
-    },
-    searchInput: {
-        height: 45,
-        borderWidth: 1,
-        borderColor: COLORS.divider,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-
     },
 
     chipScrollContent: {

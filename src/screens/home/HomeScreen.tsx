@@ -166,8 +166,8 @@ const HomeScreen = () => {
                                 borderRadius: 4,
                                 backgroundColor: COLORS.white,
                                 position: 'absolute',
-                                left: 5,
-                                bottom: 4
+                                left: 4,
+                                bottom: 8
                             }}>
                                 <View style={{ ...globalStyles.row, gap: 3, }}>
                                     {/* <SCText color={COLORS.redColor}>.</SCText> */}
@@ -185,7 +185,7 @@ const HomeScreen = () => {
                         )}
 
                         <View style={{
-                            flexDirection: 'row',
+                            ...globalStyles.row,
                             alignItems: 'center',
                             justifyContent: 'center',
                             width: '100%',
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
 
     playButton: {
         backgroundColor: COLORS.white,
-        flexDirection: 'row',
+        ...globalStyles.row,
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingVertical: 12,
